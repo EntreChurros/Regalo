@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tómbola Entre Churros</title>
+    <style>
+        :root {
+            --dorado: #c5a059;
+            --dorado-brillante: #f3cf8a;
+            --negro-puro: #000000;
+            --negro-suave: #1a1a1a;
+            --blanco: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--negro-puro);
+            background-image: url('https://i.postimg.cc/8PdJ89XM/favicon-churros.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 50%;
+            background-attachment: fixed;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            color: var(--blanco);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); 
+            backdrop-filter: blur(10px);
+            z-index: -1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-principal {
+            width: 120px;
+            filter: drop-shadow(0 0 15px var(--dorado));
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            color: var(--dorado);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+
+        .rueda-box {
+            position: relative;
+            width: 340px;
+            height: 340px;
+            border: 8px solid var(--dorado);
+            border-radius: 50%;
+            box-shadow: 0 0 40px rgba(197, 160, 89, 0.4);
+        }
+
+        .marcador {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 35px solid var(--dorado);
+            z-index: 20;
+        }
+
+        #canvasRueda {
+            border-radius: 50%;
+            transition: transform 5s cubic-bezier(0.1, 0.8, 0.2, 1);
+        }
+
+        .btn-girar {
+            margin-top: 25px;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--negro-puro);
+            background: linear-gradient(135deg, var(--dorado-brillante), var(--dorado));
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(197, 160, 89, 0.4);
+            transition: 0.3s;
+        }
+
+        .btn-girar:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        #resultado {
+            margin-top: 20px;
+            font-size: 1.4rem;
+            color: var(--dorado-brillante);
+            font-weight: bold;
+            text-align: center;
+            min-height: 35px;
+        }
+
+        .whatsapp-btn {
+            display: none;
+            margin-top: 15px;
+            background-color: #25D366;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img src="https://i.postimg.cc/8PdJ89XM/favicon-churros.png" alt="Entre Churros" class="logo-principal">
+        <h1>Tómbola de Premios</h1>
+    </div>
+
+    <div class="rueda-box">
+        <div class="marcador"></div>
+        <canvas id="canvasRueda" width="340" height="340"></canvas>
+    </div>
+
+    <button id="btnGirar" class="btn-girar">¡GIRAR Y GANAR!</button>
+    
+    <div id="resultado"></div>
+    <a id="btnWhatsapp" href="#" class="whatsapp-btn" target="_blank">RECLAMAR MI PREMIO</a>
+
+    <script>
+        const canvas = document.getElementById("canvasRueda");
+        const ctx = canvas.getContext("2d");
+        const btnGirar = document.getElementById("btnGirar");
+        const resultadoTxt = document.getElementById("resultado");
+        const btnWhatsapp = document.getElementById("btnWhatsapp");
+
+        // PREMIOS DIVIDIDOS PARA MEJOR LECTURA
+        const premios = [
+            ["2 Hand", "Rolls"],
+            ["2 Porciones", "de Papas"],
+            ["1 Docena", "Churros"],
+            ["2 Churros", "Nutella"],
+            ["4 Rellenos", "Manjar"]
+        ];
+
+        const colores = ["#000000", "#c5a059", "#1a1a1a", "#8e6d31", "#262626"];
+
+        function dibujarRueda() {
+            const numSegmentos = premios.length;
+            const anguloSegmento = (Math.PI * 2) / numSegmentos;
+
+            premios.forEach((premio, i) => {
+                ctx.save();
+                ctx.beginPath();
+                ctx.fillStyle = colores[i];
+                ctx.moveTo(170, 170);
+                ctx.arc(170, 170, 170, i * anguloSegmento, (i + 1) * anguloSegmento);
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "#c5a059";
+                ctx.stroke();
+
+                // Dibujar texto más grande
+                ctx.translate(170, 170);
+                ctx.rotate(i * anguloSegmento + anguloSegmento / 2);
+                ctx.textAlign = "center";
+                ctx.fillStyle = "white";
+                ctx.font = "bold 14px Arial"; // LETRA MÁS GRANDE
+
+                // Dibujar en dos líneas siempre para usar el ancho
+                ctx.fillText(premio[0], 110, -8);
+                ctx.fillText(premio[1], 110, 12);
+                
+                ctx.restore();
+            });
+        }
+
+        dibujarRueda();
+
+        if (localStorage.getItem("jugado_entre_churros")) {
+            btnGirar.disabled = true;
+            btnGirar.innerText = "YA PARTICIPASTE";
+            resultadoTxt.innerText = "Premio ya canjeado.";
+        }
+
+        btnGirar.addEventListener("click", () => {
+            btnGirar.disabled = true;
+            const vueltas = 10 + Math.floor(Math.random() * 5);
+            const extra = Math.floor(Math.random() * 360);
+            const totalGrados = vueltas * 360 + extra;
+
+            canvas.style.transform = `rotate(${totalGrados}deg)`;
+
+            setTimeout(() => {
+                const anguloFinal = (totalGrados % 360);
+                const indiceReal = Math.floor(((360 - anguloFinal + 270) % 360) / (360 / premios.length));
+                const premioGanado = premios[indiceReal].join(" ");
+
+                resultadoTxt.innerText = "¡GANASTE: " + premioGanado + "!";
+                localStorage.setItem("jugado_entre_churros", "true");
+
+                const numWA = "56963212660";
+                const msg = encodeURIComponent(`¡Hola! Gané "${premioGanado}" en la tómbola. ¿Cómo lo retiro?`);
+                btnWhatsapp.href = `https://wa.me/${numWA}?text=${msg}`;
+                btnWhatsapp.style.display = "inline-block";
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
